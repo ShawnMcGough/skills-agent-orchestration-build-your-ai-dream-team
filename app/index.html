@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Pulse</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="dashboard-header">
+    <h1>Project Pulse</h1>
+    <p class="dashboard-subtitle">Active projects, owners, status and priorities at a glance.</p>
+  </header>
+
+  <main class="dashboard">
+    <div class="dashboard-loading">Loading projects…</div>
+    <section class="project-grid" aria-label="Projects"></section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var DATA_URL = "project-data.json";
+      var PLACEHOLDER = "—";
+      var KNOWN_STATUSES = ["On Track", "At Risk", "Blocked", "Complete"];
+      var KNOWN_PRIORITIES = ["High", "Medium", "Low"];
+
+      var dashboard = document.querySelector("main.dashboard");
+      var grid = document.querySelector(".project-grid");
+
+      function toSlug(value) {
+        return String(value).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      }
+
+      function hasText(value) {
+        return typeof value === "string" && value.trim() !== "";
+      }
+
+      function displayText(value) {
+        return hasText(value) ? value.trim() : PLACEHOLDER;
+      }
+
+      function modifierSlug(value, knownValues) {
+        if (hasText(value) && knownValues.indexOf(value.trim()) !== -1) {
+          return toSlug(value);
+        }
+        return "unknown";
+      }
+
+      function removeLoading() {
+        var loading = dashboard.querySelector(".dashboard-loading");
+        if (loading) {
+          loading.remove();
+        }
+      }
+
+      function createElement(tagName, className, text) {
+        var element = document.createElement(tagName);
+        if (className) {
+          element.className = className;
+        }
+        if (text !== undefined) {
+          element.textContent = text;
+        }
+        return element;
+      }
+
+      function createLabeledParagraph(className, labelText, value) {
+        var paragraph = createElement("p", className);
+        paragraph.appendChild(createElement("span", "label", labelText));
+        paragraph.appendChild(document.createTextNode(" " + displayText(value)));
+        return paragraph;
+      }
+
+      function createProjectCard(project) {
+        var card = createElement("article", "project-card");
+        card.tabIndex = 0;
+
+        var status = project.status;
+        var priority = project.priority;
+
+        var badges = createElement("div", "card-badges");
+        badges.appendChild(createElement(
+          "span",
+          "status-badge status-" + modifierSlug(status, KNOWN_STATUSES),
+          displayText(status)
+        ));
+        badges.appendChild(createElement(
+          "span",
+          "priority-badge priority-" + modifierSlug(priority, KNOWN_PRIORITIES),
+          hasText(priority) ? priority.trim() + " Priority" : PLACEHOLDER
+        ));
+        card.appendChild(badges);
+
+        card.appendChild(createElement("h2", "project-name", displayText(project.name)));
+        card.appendChild(createLabeledParagraph("project-owner", "Owner", project.owner));
+        card.appendChild(createLabeledParagraph("project-activity", "Recent activity", project.recentActivity));
+
+        if (hasText(project.summary)) {
+          card.appendChild(createElement("p", "project-summary", project.summary.trim()));
+        }
+
+        return card;
+      }
+
+      function showEmpty() {
+        removeLoading();
+        dashboard.appendChild(createElement(
+          "div",
+          "dashboard-empty",
+          "No projects to show yet. Add entries to the \"projects\" array in project-data.json."
+        ));
+      }
+
+      function showError(message) {
+        removeLoading();
+        var errorBox = createElement("div", "dashboard-error", message);
+        errorBox.setAttribute("role", "alert");
+        dashboard.appendChild(errorBox);
+      }
+
+      function renderProjects(projects) {
+        removeLoading();
+        projects.forEach(function (project) {
+          var safeProject = project && typeof project === "object" ? project : {};
+          grid.appendChild(createProjectCard(safeProject));
+        });
+      }
+
+      function loadProjects() {
+        fetch(DATA_URL)
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error("Request for " + DATA_URL + " failed with HTTP " + response.status + " " + response.statusText + ".");
+            }
+            return response.text();
+          })
+          .then(function (rawText) {
+            var data;
+            try {
+              data = JSON.parse(rawText);
+            } catch (parseError) {
+              throw new Error(DATA_URL + " contains invalid JSON: " + parseError.message);
+            }
+
+            var projects = data && data.projects;
+            if (!Array.isArray(projects) || projects.length === 0) {
+              showEmpty();
+              return;
+            }
+            renderProjects(projects);
+          })
+          .catch(function (error) {
+            console.error("Project Pulse: unable to load project data.", error);
+            showError(
+              "We couldn't load the project data. " + error.message +
+              " Make sure the dashboard is served over HTTP (for example with the \"Run Project Pulse Dashboard\" launch configuration) rather than opened as a file, and that project-data.json exists."
+            );
+          });
+      }
+
+      loadProjects();
+    })();
+  </script>
+</body>
+</html>

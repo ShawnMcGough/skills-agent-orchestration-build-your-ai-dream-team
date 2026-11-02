@@ -1,0 +1,52 @@
+{
+  "projects": [
+    {
+      "name": "Checkout Redesign",
+      "owner": "Mona Lisa",
+      "status": "On Track",
+      "recentActivity": "Merged new payment form layout; QA pass scheduled for Thursday.",
+      "priority": "High",
+      "summary": "Simplify the checkout flow to three steps. Good first issues are labeled for form validation tweaks."
+    },
+    {
+      "name": "Mobile Offline Sync",
+      "owner": "Diego Ramirez",
+      "status": "At Risk",
+      "recentActivity": "Conflict-resolution spike uncovered edge cases with large attachments.",
+      "priority": "High",
+      "summary": "Let the mobile app queue edits offline and sync safely. Help wanted on test coverage for merge conflicts."
+    },
+    {
+      "name": "Docs Site Migration",
+      "owner": "Priya Shah",
+      "status": "Blocked",
+      "recentActivity": "Waiting on DNS change approval from the platform team.",
+      "priority": "Medium",
+      "summary": "Move the docs site to the new static generator. Contributors can help port remaining guide pages."
+    },
+    {
+      "name": "Accessibility Audit",
+      "owner": "Sam Okafor",
+      "status": "Complete",
+      "recentActivity": "Final report published; all critical issues resolved.",
+      "priority": "Medium",
+      "summary": "WCAG AA review of core pages. Follow-up polish items are tracked in the a11y backlog."
+    },
+    {
+      "name": "Internal Metrics Dashboard",
+      "owner": "Lena Fischer",
+      "status": "On Track",
+      "recentActivity": "Added weekly active contributor chart and CSV export.",
+      "priority": "Low",
+      "summary": "Lightweight charts for team health metrics. Great place to start if you enjoy data visualization."
+    },
+    {
+      "name": "Legacy API Cleanup",
+      "owner": "Kenji Watanabe",
+      "status": "At Risk",
+      "recentActivity": "Two downstream consumers still call deprecated v1 endpoints.",
+      "priority": "Low",
+      "summary": "Retire unused v1 endpoints and update client SDKs. Coordinate in the #api-cleanup channel before removing routes."
+    }
+  ]
+}
